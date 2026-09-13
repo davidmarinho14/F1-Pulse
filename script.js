@@ -118,7 +118,7 @@ function renderDrivers(drivers) {
             driver.Constructors?.[0]?.name || "Unknown team";
 
         return `
-            <div class="driver-card">
+            <div class="driver-card position-${driver.position}">
 
                 <div class="driver-position">
                     ${driver.position}

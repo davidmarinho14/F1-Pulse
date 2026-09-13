@@ -376,24 +376,71 @@ input:focus {
 
 .loading {
     color: var(--muted);
-    padding: 30px;
+    padding: 35px;
     text-align: center;
     border: 1px dashed var(--border);
     border-radius: 6px;
+    background: var(--surface);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.loading::before {
+    content: "●";
+    display: inline-block;
+    margin-right: 10px;
+    color: var(--red);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 /* ERROR */
 
 .error-message {
     margin: 30px 6%;
-    padding: 20px;
+    padding: 24px;
     background: #24100f;
     border: 1px solid #70201c;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 20px;
+    animation: errorAppear 0.3s ease;
+}
+
+.error-message strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.error-message p {
+    color: var(--muted);
+    margin-top: 4px;
+    font-size: 14px;
+}
+
+@keyframes errorAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .error-message p {
@@ -499,4 +546,23 @@ input:focus {
         flex-direction: column;
         gap: 15px;
     }
+}
+/* TOP 3 DRIVERS */
+
+.driver-card.position-1 {
+    border-left: 4px solid #ffd700;
+}
+
+.driver-card.position-2 {
+    border-left: 4px solid #c0c0c0;
+}
+
+.driver-card.position-3 {
+    border-left: 4px solid #cd7f32;
+}
+
+.driver-card.position-1 .driver-position,
+.driver-card.position-2 .driver-position,
+.driver-card.position-3 .driver-position {
+    color: var(--text);
 }
