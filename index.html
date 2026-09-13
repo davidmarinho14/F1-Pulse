@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>F1 Pulse | Formula 1 Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo">
+            F1<span>PULSE</span>
+        </div>
+
+        <nav class="nav">
+            <a href="#dashboard">Dashboard</a>
+            <a href="#pilotos">Pilotos</a>
+            <a href="#corridas">Corridas</a>
+        </nav>
+
+        <div class="season-selector">
+            <label for="season">Temporada</label>
+            <select id="season">
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+            </select>
+        </div>
+    </header>
+
+
+    <main id="dashboard">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-content">
+
+                <p class="eyebrow">FORMULA 1 • SEASON DASHBOARD</p>
+
+                <h1>
+                    THE
+                    <span>RACE</span>
+                    NEVER STOPS.
+                </h1>
+
+                <p class="hero-description">
+                    Explore drivers, teams and championship standings
+                    from the Formula 1 season.
+                </p>
+
+                <button id="load-season" class="primary-button">
+                    Load Season
+                </button>
+
+            </div>
+
+            <div class="hero-number">
+                <span>01</span>
+            </div>
+        </section>
+
+
+        <!-- STATUS -->
+        <section class="status-section">
+
+            <div class="status-card">
+                <span class="status-label">CURRENT ROUND</span>
+                <strong id="current-round">--</strong>
+            </div>
+
+            <div class="status-card">
+                <span class="status-label">DRIVERS</span>
+                <strong id="driver-count">--</strong>
+            </div>
+
+            <div class="status-card">
+                <span class="status-label">SEASON</span>
+                <strong id="current-season">2026</strong>
+            </div>
+
+        </section>
+
+
+        <!-- DRIVERS -->
+        <section id="pilotos" class="content-section">
+
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">CHAMPIONSHIP</p>
+                    <h2>Drivers</h2>
+                </div>
+
+                <div class="search-box">
+                    <input
+                        type="text"
+                        id="driver-search"
+                        placeholder="Search driver..."
+                    >
+
+                    <button id="search-driver">
+                        Search
+                    </button>
+                </div>
+            </div>
+
+
+            <div id="driver-result" class="driver-result"></div>
+
+
+            <div id="drivers-list" class="drivers-list">
+
+                <div class="loading">
+                    Loading championship...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONSTRUCTORS -->
+        <section class="content-section">
+
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">CHAMPIONSHIP</p>
+                    <h2>Constructors</h2>
+                </div>
+            </div>
+
+            <div id="constructors-list" class="constructors-list">
+
+                <div class="loading">
+                    Loading teams...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RACES -->
+        <section id="corridas" class="content-section">
+
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">CALENDAR</p>
+                    <h2>Season Races</h2>
+                </div>
+            </div>
+
+            <div id="races-list" class="races-list">
+
+                <div class="loading">
+                    Loading races...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ERROR -->
+        <div id="error-message" class="error-message hidden">
+
+            <div>
+                <strong>Something went wrong.</strong>
+
+                <p>
+                    We couldn't load the Formula 1 data.
+                    Please try again.
+                </p>
+            </div>
+
+            <button id="retry-button">
+                Try again
+            </button>
+
+        </div>
+
+    </main>
+
+
+    <footer class="footer">
+
+        <div class="logo">
+            F1<span>PULSE</span>
+        </div>
+
+        <p>
+            Data provided by the Jolpica F1 API.
+        </p>
+
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
