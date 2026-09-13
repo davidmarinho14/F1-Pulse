@@ -83,7 +83,7 @@ Utilizado na pesquisa de pilotos para consultar informações específicas de um
 1. Clone este repositório:
 
 ```bash
-git clone URL_DO_REPOSITORIO
+git clone https://github.com/davidmarinho14/F1-Pulse.git
 ```
 
 2. Entre na pasta do projeto:
@@ -114,14 +114,12 @@ F1-Pulse/
 ```
 
 ## 🌐 Projeto publicado
-
 **GitHub Pages:**
-A DEFINIR
+https://davidmarinho14.github.io/F1-Pulse/
 
 ## 📦 Repositório
-
 **GitHub:**
-A DEFINIR
+https://github.com/davidmarinho14/F1-Pulse
 
 ## 📄 Licença
 
