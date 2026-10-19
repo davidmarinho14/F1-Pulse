@@ -16,7 +16,7 @@
       try {
         const response = await transport(`${url}/rest/v1/${path}`, {
           method, signal: controller.signal,
-          headers: { apikey: key, "Content-Type": "application/json", Prefer: "return=representation" },
+          headers: { apikey: key, ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}), "Content-Type": "application/json", Prefer: "return=representation" },
           ...(body === undefined ? {} : { body: JSON.stringify(body) })
         });
         const data = await response.json().catch(() => null);

@@ -130,10 +130,10 @@ function renderDrivers(drivers) {
             driver.Constructors?.[0]?.name || "Unknown team";
 
         return `
-            <div class="driver-card position-${driver.position}">
+            <div class="driver-card position-${escapeHTML(driver.position)}">
 
                 <div class="driver-position">
-                    ${driver.position}
+                    ${escapeHTML(driver.position)}
                 </div>
 
                 <div>
@@ -180,7 +180,7 @@ function renderConstructors(constructors) {
 
                 <div>
                     <div class="constructor-name">
-                        ${team.position}. ${escapeHTML(team.Constructor.name)}
+                        ${escapeHTML(team.position)}. ${escapeHTML(team.Constructor.name)}
                     </div>
 
                     <div class="driver-team">
@@ -189,7 +189,7 @@ function renderConstructors(constructors) {
                 </div>
 
                 <div class="constructor-points">
-                    ${team.points} PTS
+                    ${escapeHTML(team.points)} PTS
                 </div>
 
             </div>
@@ -225,7 +225,7 @@ function renderRaces(races) {
             <div class="race-card">
 
                 <div class="race-round">
-                    ROUND ${race.round}
+                    ROUND ${escapeHTML(race.round)}
                 </div>
 
                 <div class="race-name">
@@ -292,7 +292,7 @@ async function searchDriver() {
         const driverId = driver.Driver.driverId;
 
         const data = await fetchAPI(
-            `${season}/drivers/${driverId}/driverstandings/`
+            `${season}/drivers/${encodeURIComponent(driverId)}/driverstandings/`
         );
 
         if (request !== searchRequest) return;
@@ -325,12 +325,12 @@ async function searchDriver() {
 
                 <p>
                     Championship position:
-                    ${result.position}
+                    ${escapeHTML(result.position)}
                 </p>
 
                 <p>
                     Points:
-                    ${result.points}
+                    ${escapeHTML(result.points)}
                 </p>
 
                 <p>
