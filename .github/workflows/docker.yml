@@ -1,0 +1,61 @@
+name: Docker - construir e publicar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir imagem
+        run: docker build -t davidmarinho14/f1-pulse:1.0 .
+      - name: Verificar container e arquivos publicos
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name f1-pulse -p 8080:80 davidmarinho14/f1-pulse:1.0
+          trap 'docker rm -f f1-pulse' EXIT
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://localhost:8080/ -o /tmp/f1-index.html; then break; fi
+            sleep 1
+          done
+          grep -q 'F1 Pulse' /tmp/f1-index.html
+          for file in style.css config.js db.js script.js persistence.js; do
+            curl -fsS "http://localhost:8080/$file" > /dev/null
+          done
+      - name: Entrar no Docker Hub
+        if: github.event_name == 'workflow_dispatch'
+        uses: docker/login-action@v4
+        with:
+          username: davidmarinho14
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Publicar tags 1.0 e latest
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          docker tag davidmarinho14/f1-pulse:1.0 davidmarinho14/f1-pulse:latest
+          docker push davidmarinho14/f1-pulse:1.0
+          docker push davidmarinho14/f1-pulse:latest
+
+  verificar-publicacao:
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar e executar imagem publica em ambiente limpo
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name f1-pulse -p 8080:80 davidmarinho14/f1-pulse:1.0
+          trap 'docker rm -f f1-pulse' EXIT
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://localhost:8080/ -o /tmp/f1-index.html; then break; fi
+            sleep 1
+          done
+          grep -q 'F1 Pulse' /tmp/f1-index.html
+          curl -fsS http://localhost:8080/config.js > /dev/null

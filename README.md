@@ -1,6 +1,6 @@
 # F1 Pulse — Formula 1 Season Dashboard · Etapa 02
 
-> **Estado desta entrega:** implementação disponível na branch `etapa02` do mesmo repositório. Os testes locais com banco simulado passaram. A URL e a chave pública Supabase foram configuradas. A API respondeu, mas a tabela favoritos ainda não existe (PGRST205); executar o SQL continua pendente. A imagem Docker ainda não foi construída/publicada. O Pages continua servindo a Etapa 01. Este README ainda precisa do link real da imagem e da validação online antes do envio final ao Moodle.
+> **Estado desta entrega:** Supabase configurado e validado no banco real: criar, consultar, remover, duplicados, estatísticas e restrições de acesso. A interface também passou no fluxo real de salvar/recarregar/remover e gravar histórico. A publicação Docker ainda depende do segredo DOCKERHUB_TOKEN no GitHub. O código é a evolução do mesmo repositório, com histórico preservado.
 
 ## Evolução da Etapa 02
 
@@ -20,7 +20,7 @@ Novos recursos implementados:
 - **A — Histórico de buscas:** segunda tabela `historico`, com `insert` e `select`; registra termo, temporada e se houve resultado. Buscas não encontradas ou com falha também são registradas com `encontrado=false`. A interface mostra as últimas cinco buscas, clicáveis, e restaura a temporada antes de repetir a consulta. Busca vazia não é enviada. A gravação ocorre em segundo plano e sua falha não apaga o resultado da consulta. Falha e ausência de resultado compartilham o estado booleano previsto na apostila.
 - **C — Estatísticas:** função SQL `estatisticas_favoritos()` calcula total de favoritos, favorito mais recente, equipe mais frequente e quantidade de equipes. Após salvar/remover, o frontend consulta novamente essa função. Em empate de equipes, vence a primeira em ordem alfabética. Os números vêm dos registros persistidos, não da API Jolpica.
 
-As duas sidequests estão cobertas por testes locais com respostas simuladas. A conclusão em produção depende de executar o SQL e configurar o Supabase. O Compose é um recurso extra; a sidequest B não é reivindicada, pois não houve publicação das tags 1.0/1.1.
+As duas sidequests estão cobertas por testes locais com respostas simuladas. As tabelas já foram criadas e a integração real foi validada. O Compose é um recurso extra; a sidequest B não é reivindicada, pois não houve publicação das tags 1.0/1.1.
 
 ## Configurar o Supabase real
 
@@ -100,6 +100,17 @@ docker run -d -p 8080:80 SEU_USUARIO/f1-pulse:1.0
 
 Valide esse último comando em ambiente limpo, depois de publicar. Não foi possível construir ou executar containers nesta sessão porque Docker não está instalado/disponível.
 
+### Publicar pelo GitHub sem instalar Docker
+
+O arquivo `.github/workflows/docker.yml` constrói e verifica o container em cada atualização de `main`. Para publicar as tags `1.0` e `latest`:
+
+1. No Docker Hub, crie o repositório público `davidmarinho14/f1-pulse`.
+2. Crie um token de acesso Docker Hub com permissão de leitura e escrita.
+3. No GitHub, Settings → Secrets and variables → Actions → New repository secret: nome `DOCKERHUB_TOKEN`, valor igual ao token. Não envie esse token no chat nem o grave em arquivos.
+4. Em Actions, abra **Docker - construir e publicar**, clique em **Run workflow** na branch `main`.
+5. A ação constrói, testa e publica; outro job, em runner limpo e sem login, baixa e executa a imagem pública.
+6. Só depois do sucesso, confirme o endereço da imagem e atualize o status deste README.
+
 ## Testes e evidências
 
 Executados localmente em 18/10/2026:
@@ -121,11 +132,11 @@ npm run test:browser
 
 Opcional: defina `F1_BROWSER_PATH` com o caminho de um Chrome/Chromium já instalado. O navegador de teste usa servidor HTTP local e intercepta Jolpica/Supabase; nenhum dado de teste é enviado a um banco real. Capturas são gravadas em `test-results/`, ignorado pelo Git.
 
-**Não executados:** SQL em Supabase real, confirmação efetiva das políticas RLS, persistência entre dispositivos reais, build/run/pull Docker e publicação no Hub. Os testes simulados não comprovam esses itens. Veja [docs/VALIDACAO.md](docs/VALIDACAO.md) para concluir a validação real.
+**Validação adicional com Supabase real:** SELECT nas duas tabelas, INSERT/SELECT/DELETE de favorito temporário, duplicado rejeitado com 23505, UPDATE de favoritos negado, UPDATE/DELETE de histórico negados, função de estatísticas funcionando. Pela interface com APIs reais: salvar, recarregar, remover e registrar/listar histórico passaram. O favorito temporário foi removido; uma busca de piloto permaneceu no histórico. Isso verifica as permissões efetivas da chave pública, sem acesso administrativo ao catálogo RLS. **Ainda não executados:** teste em dois dispositivos físicos e publicação/pull da imagem Docker. Veja [docs/VALIDACAO.md](docs/VALIDACAO.md) para concluir a validação real.
 
 ## Git, publicação e recuperação do ZIP
 
-A branch `etapa02` foi criada a partir do histórico original (base `09e27b6`), com pelo menos cinco commits reais incrementais e publicação no mesmo `origin`. Não houve reescrita do histórico nem substituição do projeto por um repositório novo. A branch `main` e o Pages original foram preservados enquanto a configuração do banco está pendente.
+A branch `etapa02` foi criada a partir do histórico original (base `09e27b6`), com pelo menos cinco commits reais incrementais e publicação no mesmo `origin`. Não houve reescrita do histórico nem substituição do projeto por um repositório novo. A evolução mantém o conteúdo e o histórico da Etapa 01 e está preparada para implantação no Pages.
 
 O ZIP final inclui o código e `F1-Pulse.bundle`, que transporta o histórico Git completo. Para recuperar um clone a partir do pacote:
 
@@ -142,7 +153,7 @@ Para publicar no Pages, finalize configuração e testes reais, integre a branch
 
 - **Mesmo repositório:** [davidmarinho14/F1-Pulse](https://github.com/davidmarinho14/F1-Pulse)
 - **Código da Etapa 02:** [branch etapa02](https://github.com/davidmarinho14/F1-Pulse/tree/etapa02)
-- **GitHub Pages existente (Etapa 01):** [F1 Pulse](https://davidmarinho14.github.io/F1-Pulse/)
+- **GitHub Pages:** [F1 Pulse](https://davidmarinho14.github.io/F1-Pulse/)
 - **Imagem Docker Hub:** pendente de publicação; nenhum endereço de imagem foi inventado.
 
 ---
