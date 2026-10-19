@@ -80,7 +80,14 @@ const server = http.createServer((req,res) => {
     emptyAPI=true;
     await page.locator('#load-season').click();
     await page.waitForFunction(()=>document.querySelector('#drivers-list').textContent.includes('No drivers'));
+    emptyAPI=false;
+    await page.route('**/config.js', route => route.fulfill({contentType:'text/javascript',body:'window.F1_CONFIG={supabaseUrl:"",supabaseKey:""};'}));
+    await page.reload();
+    await page.locator('#drivers-list [data-save]').waitFor();
+    await page.waitForFunction(()=>document.querySelector('#db-message').textContent.includes('Configure'));
+    await page.locator('#drivers-list [data-save]').click();
+    await page.waitForFunction(()=>document.querySelector('#db-message').textContent.includes('Configure'));
     assert.deepEqual(errors,[]);
-    console.log('PASS: classificação, salvar/listar/remover, recarga, duplicado, buscas, repetição, RLS simulada, XSS, temporada vazia e viewport móvel.');
+    console.log('PASS: classificação, salvar/listar/remover, recarga, duplicado, buscas, repetição, RLS simulada, XSS, temporada vazia, viewport móvel e configuração ausente.');
   } finally { await browser.close(); server.close(); }
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

@@ -1,4 +1,153 @@
-# F1 Pulse — Formula 1 Season Dashboard
+# F1 Pulse — Formula 1 Season Dashboard · Etapa 02
+
+> **Estado desta entrega:** implementação disponível na branch `etapa02` do mesmo repositório. Os testes locais com banco simulado passaram. O Supabase real ainda não foi configurado, e a imagem Docker ainda não foi construída/publicada. O Pages continua servindo a Etapa 01. Este README ainda precisa do link real da imagem e da validação online antes do envio final ao Moodle.
+
+## Evolução da Etapa 02
+
+O F1 Pulse original foi preservado: HTML, identidade visual, seleção de temporadas, classificação de pilotos e construtores, calendário e pesquisa continuam na aplicação. O ZIP da apostila contém uma Pokédex de exemplo; ela não substituiu este projeto. A documentação anterior está em [docs/README-etapa01.md](docs/README-etapa01.md), e o histórico Git original foi mantido.
+
+Novos recursos implementados:
+
+- Salvar, listar e remover pilotos favoritos diretamente no Supabase por `fetch` e API REST, sem simulação ou armazenamento local na aplicação.
+- Favoritos identificados pelo par `piloto_id` + `temporada`, impedindo duplicados sem impedir o mesmo piloto em anos diferentes.
+- Lista pública compartilhada, conforme o modelo acadêmico da apostila: qualquer visitante pode consultar, inserir e remover favoritos. Não há conta individual. Não use o histórico para informações privadas.
+- Erros de configuração, conexão, timeout, duplicados, permissões e excesso de requisições recebem mensagens na tela.
+- Carregamento dos favoritos em páginas de 50 registros; estatísticas agregadas no banco abrangem todos os registros.
+- Botão para atualizar dados salvos quando outro visitante alterar a coleção.
+
+### Sidequests implementadas: A e C
+
+- **A — Histórico de buscas:** segunda tabela `historico`, com `insert` e `select`; registra termo, temporada e se houve resultado. Buscas não encontradas ou com falha também são registradas com `encontrado=false`. A interface mostra as últimas cinco buscas, clicáveis, e restaura a temporada antes de repetir a consulta. Busca vazia não é enviada. A gravação ocorre em segundo plano e sua falha não apaga o resultado da consulta. Falha e ausência de resultado compartilham o estado booleano previsto na apostila.
+- **C — Estatísticas:** função SQL `estatisticas_favoritos()` calcula total de favoritos, favorito mais recente, equipe mais frequente e quantidade de equipes. Após salvar/remover, o frontend consulta novamente essa função. Em empate de equipes, vence a primeira em ordem alfabética. Os números vêm dos registros persistidos, não da API Jolpica.
+
+As duas sidequests estão cobertas por testes locais com respostas simuladas. A conclusão em produção depende de executar o SQL e configurar o Supabase. O Compose é um recurso extra; a sidequest B não é reivindicada, pois não houve publicação das tags 1.0/1.1.
+
+## Configurar o Supabase real
+
+1. Crie ou abra seu projeto em [Supabase Dashboard](https://supabase.com/dashboard).
+2. No SQL Editor, execute **uma vez** [docs/setup_supabase.sql](docs/setup_supabase.sql). O script é transacional e cria tabelas novas; não apaga tabelas existentes. Se já existir uma tabela com esses nomes, revise o esquema antes de adaptar uma migração. Não execute comandos de exclusão para contornar o erro.
+3. Nas configurações de API do projeto, copie a URL e a chave pública `anon` ou `sb_publishable_...`.
+4. Edite `config.js`:
+
+```js
+window.F1_CONFIG = {
+  supabaseUrl: "", // substitua pela URL real do seu projeto
+  supabaseKey: ""  // substitua pela chave pública real
+};
+```
+
+Os campos foram entregues vazios de propósito; não há credencial inventada. Nunca coloque `service_role`, `sb_secret_...` ou senha do banco no navegador, no Git ou na imagem. O cliente rejeita chaves sem formato público reconhecido. As chaves públicas ficam visíveis no frontend e sua autorização depende dos grants e do RLS.
+
+### Modelo e permissões
+
+| Objeto | Campos/operação |
+| --- | --- |
+| `favoritos` | `id`, `criado_em`, `piloto_id`, `temporada`, `nome`, `equipe`, `nacionalidade`; UNIQUE em piloto/temporada |
+| `historico` | `id`, `criado_em`, `termo`, `temporada`, `encontrado` |
+| `estatisticas_favoritos()` | Agrega os favoritos com `security invoker`; respeita permissões do chamador |
+
+RLS ativo nas duas tabelas. O papel `anon` recebe SELECT/INSERT/DELETE em favoritos e SELECT/INSERT em histórico, além do uso das sequências e execução da função de estatísticas. UPDATE não foi liberado; DELETE do histórico também não. O papel `authenticated` não é usado pela aplicação e não recebe esses acessos. Há validação de tamanho, temporada e identificador no banco. A lista compartilhada é deliberada; para coleções privadas seria necessário adicionar autenticação e políticas por `auth.uid()`.
+
+Documentação: [REST Supabase](https://supabase.com/docs/guides/api), [RLS e grants](https://supabase.com/docs/guides/database/postgres/row-level-security).
+
+## Executar esta versão localmente
+
+```bash
+git clone --branch etapa02 https://github.com/davidmarinho14/F1-Pulse.git
+cd F1-Pulse
+python -m http.server 5500
+```
+
+Abra [http://localhost:5500](http://localhost:5500). Também pode usar Live Server. Configure `config.js` para habilitar o banco; sem configuração, as consultas da Jolpica continuam disponíveis e a área persistente explica o que falta. Os caminhos são relativos, compatíveis com o subdiretório `/F1-Pulse/` do Pages.
+
+## Executar com Docker
+
+Pré-requisito: Docker Engine/Desktop em execução, com containers Linux. Configure `config.js` **antes do build**, pois ele é copiado para a imagem. Variáveis `docker run -e` não alteram automaticamente uma aplicação estática. Nunca passe uma chave secreta no build.
+
+```bash
+docker build -t f1-pulse:1.0 .
+docker run -d --name f1-pulse -p 8080:80 f1-pulse:1.0
+```
+
+Abra [http://localhost:8080](http://localhost:8080).
+
+Alternativa com Compose:
+
+```bash
+docker compose up --build -d
+docker compose down
+```
+
+O Dockerfile usa a imagem oficial `nginx:stable-alpine`, copia apenas os arquivos públicos, expõe a porta 80 e verifica a resposta HTTP com um healthcheck. O `.dockerignore` exclui histórico Git, testes, documentos e arquivos de ambiente do contexto. Após mudar arquivos, reconstrua a imagem. O banco permanece no Supabase e não é apagado ao recriar o container.
+
+### Publicar a imagem — pendente
+
+Ainda não há usuário/repositório Docker Hub informado nem imagem publicada. Não há um terceiro link de imagem verificável nesta entrega. Substitua `SEU_USUARIO` abaixo pelo usuário real do Docker Hub; estes comandos são instruções, não evidência de execução:
+
+```bash
+docker login
+docker tag f1-pulse:1.0 SEU_USUARIO/f1-pulse:1.0
+docker tag f1-pulse:1.0 SEU_USUARIO/f1-pulse:latest
+docker push SEU_USUARIO/f1-pulse:1.0
+docker push SEU_USUARIO/f1-pulse:latest
+```
+
+Crie/confira o repositório público no [Docker Hub](https://hub.docker.com/), copie seu endereço real para a seção Links e substitua o usuário no comando de consumo:
+
+```bash
+docker run -d -p 8080:80 SEU_USUARIO/f1-pulse:1.0
+```
+
+Valide esse último comando em ambiente limpo, depois de publicar. Não foi possível construir ou executar containers nesta sessão porque Docker não está instalado/disponível.
+
+## Testes e evidências
+
+Executados localmente em 18/10/2026:
+
+- `node --check script.js`, `node --check db.js`, `node --check persistence.js`: passaram.
+- `node --test tests/db.test.cjs`: **3 testes passaram**, cobrindo configuração ausente/chave secreta, requisições CRUD e mensagens para duplicado, acesso negado, limite, erro de servidor, rede e timeout.
+- `node tests/browser.cjs`: passou em Chromium/Chrome com rede simulada. Verificou classificação, salvar/listar/remover, recarga da página, duplicado, busca com e sem resultado, repetição do histórico, erro de permissão simulado, texto malicioso renderizado como texto, temporada sem classificação, viewport móvel e ausência de configuração.
+- Capturas desktop (1365 px) e móvel (390 px) inspecionadas; teste de largura móvel sem rolagem horizontal.
+- Repositório, Pages e endpoint Jolpica de classificação de 2025 responderam HTTP 200. Isso confirma acesso aos links, não implantação da Etapa 02 no Pages.
+
+Para repetir os testes de navegador:
+
+```bash
+npm install
+npx playwright install chromium
+npm test
+npm run test:browser
+```
+
+Opcional: defina `F1_BROWSER_PATH` com o caminho de um Chrome/Chromium já instalado. O navegador de teste usa servidor HTTP local e intercepta Jolpica/Supabase; nenhum dado de teste é enviado a um banco real. Capturas são gravadas em `test-results/`, ignorado pelo Git.
+
+**Não executados:** SQL em Supabase real, confirmação efetiva das políticas RLS, persistência entre dispositivos reais, build/run/pull Docker e publicação no Hub. Os testes simulados não comprovam esses itens. Veja [docs/VALIDACAO.md](docs/VALIDACAO.md) para concluir a validação real.
+
+## Git, publicação e recuperação do ZIP
+
+A branch `etapa02` foi criada a partir do histórico original (base `09e27b6`), com pelo menos cinco commits reais incrementais e publicação no mesmo `origin`. Não houve reescrita do histórico nem substituição do projeto por um repositório novo. A branch `main` e o Pages original foram preservados enquanto a configuração do banco está pendente.
+
+O ZIP final inclui o código e `F1-Pulse.bundle`, que transporta o histórico Git completo. Para recuperar um clone a partir do pacote:
+
+```bash
+git clone F1-Pulse.bundle F1-Pulse-restaurado
+cd F1-Pulse-restaurado
+git switch etapa02
+git remote set-url origin https://github.com/davidmarinho14/F1-Pulse.git
+```
+
+Para publicar no Pages, finalize configuração e testes reais, integre a branch `etapa02` em `main`, confira a origem configurada em Settings → Pages e aguarde a implantação. Depois valide os fluxos do banco no endereço público. Não declare a Etapa 02 online antes dessa confirmação.
+
+## Links da entrega
+
+- **Mesmo repositório:** [davidmarinho14/F1-Pulse](https://github.com/davidmarinho14/F1-Pulse)
+- **Código da Etapa 02:** [branch etapa02](https://github.com/davidmarinho14/F1-Pulse/tree/etapa02)
+- **GitHub Pages existente (Etapa 01):** [F1 Pulse](https://davidmarinho14.github.io/F1-Pulse/)
+- **Imagem Docker Hub:** pendente de publicação; nenhum endereço de imagem foi inventado.
+
+---
+
+## Documentação original da Etapa 01
 
 ## 👨‍💻 Autor
 
