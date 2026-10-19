@@ -1,0 +1,11 @@
+.git
+.gitignore
+docs
+tests
+node_modules
+*.zip
+*.bundle
+.env*
+README.md
+Dockerfile
+docker-compose.yml
