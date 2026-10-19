@@ -1,6 +1,6 @@
 # F1 Pulse — Formula 1 Season Dashboard · Etapa 02
 
-> **Estado desta entrega:** implementação disponível na branch `etapa02` do mesmo repositório. Os testes locais com banco simulado passaram. O Supabase real ainda não foi configurado, e a imagem Docker ainda não foi construída/publicada. O Pages continua servindo a Etapa 01. Este README ainda precisa do link real da imagem e da validação online antes do envio final ao Moodle.
+> **Estado desta entrega:** implementação disponível na branch `etapa02` do mesmo repositório. Os testes locais com banco simulado passaram. A URL e a chave pública Supabase foram configuradas. A API respondeu, mas a tabela favoritos ainda não existe (PGRST205); executar o SQL continua pendente. A imagem Docker ainda não foi construída/publicada. O Pages continua servindo a Etapa 01. Este README ainda precisa do link real da imagem e da validação online antes do envio final ao Moodle.
 
 ## Evolução da Etapa 02
 
@@ -36,7 +36,7 @@ window.F1_CONFIG = {
 };
 ```
 
-Os campos foram entregues vazios de propósito; não há credencial inventada. Nunca coloque `service_role`, `sb_secret_...` ou senha do banco no navegador, no Git ou na imagem. O cliente rejeita chaves sem formato público reconhecido. As chaves públicas ficam visíveis no frontend e sua autorização depende dos grants e do RLS.
+O config.js já contém a URL e a chave pública fornecidas pelo autor; para usar outro projeto, substitua esses valores. Nunca coloque `service_role`, `sb_secret_...` ou senha do banco no navegador, no Git ou na imagem. O cliente rejeita chaves sem formato público reconhecido. As chaves públicas ficam visíveis no frontend e sua autorização depende dos grants e do RLS.
 
 ### Modelo e permissões
 
@@ -82,7 +82,7 @@ O Dockerfile usa a imagem oficial `nginx:stable-alpine`, copia apenas os arquivo
 
 ### Publicar a imagem — pendente
 
-Ainda não há usuário/repositório Docker Hub informado nem imagem publicada. Não há um terceiro link de imagem verificável nesta entrega. Substitua `SEU_USUARIO` abaixo pelo usuário real do Docker Hub; estes comandos são instruções, não evidência de execução:
+O usuário Docker Hub informado é davidmarinho14; ainda não há imagem publicada. Não há um terceiro link de imagem verificável nesta entrega. Substitua `SEU_USUARIO` abaixo pelo usuário real do Docker Hub; estes comandos são instruções, não evidência de execução:
 
 ```bash
 docker login
