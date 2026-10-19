@@ -1,6 +1,6 @@
 # F1 Pulse — Formula 1 Season Dashboard · Etapa 02
 
-> **Estado desta entrega:** Supabase configurado e validado no banco real: criar, consultar, remover, duplicados, estatísticas e restrições de acesso. A interface também passou no fluxo real de salvar/recarregar/remover e gravar histórico. A publicação Docker ainda depende do segredo DOCKERHUB_TOKEN no GitHub. O código é a evolução do mesmo repositório, com histórico preservado. A branch etapa02 está atualizada; main e o Pages continuam na versão anterior, aguardando autorização para atualização.
+> **Estado desta entrega:** Etapa 02 publicada no GitHub Pages e validada no navegador público, com Supabase real funcionando. A imagem Docker foi construída e o container passou na verificação HTTP pelo GitHub Actions. Resta publicar a imagem no Docker Hub e validar seu download público; essa etapa depende do segredo DOCKERHUB_TOKEN no GitHub.
 
 ## Evolução da Etapa 02
 
@@ -98,7 +98,7 @@ Crie/confira o repositório público no [Docker Hub](https://hub.docker.com/), c
 docker run -d -p 8080:80 SEU_USUARIO/f1-pulse:1.0
 ```
 
-Valide esse último comando em ambiente limpo, depois de publicar. Não foi possível construir ou executar containers nesta sessão porque Docker não está instalado/disponível.
+Valide esse último comando em ambiente limpo, depois de publicar. Docker não está instalado localmente. A construção da imagem e a execução do container foram verificadas com sucesso no GitHub Actions: https://github.com/davidmarinho14/F1-Pulse/actions/runs/39188843789. Os passos de login/publicação foram ignorados nessa execução automática; ela não comprova publicação no Hub.
 
 ### Publicar pelo GitHub sem instalar Docker
 
@@ -112,6 +112,8 @@ O arquivo `.github/workflows/docker.yml` constrói e verifica o container em cad
 6. Só depois do sucesso, confirme o endereço da imagem e atualize o status deste README.
 
 ## Testes e evidências
+
+**Publicação confirmada:** navegador no Pages público carregou favoritos/estatísticas do Supabase e classificação real de 2025. Build da imagem Docker e teste HTTP do container passaram na execução GitHub Actions 39188843789. A imagem ainda não foi enviada ao Hub.
 
 Executados localmente em 18/10/2026:
 
@@ -136,7 +138,7 @@ Opcional: defina `F1_BROWSER_PATH` com o caminho de um Chrome/Chromium já insta
 
 ## Git, publicação e recuperação do ZIP
 
-A branch `etapa02` foi criada a partir do histórico original (base `09e27b6`), com pelo menos cinco commits reais incrementais e publicação no mesmo `origin`. Não houve reescrita do histórico nem substituição do projeto por um repositório novo. A evolução mantém o conteúdo e o histórico da Etapa 01 e está preparada para implantação no Pages.
+A branch `etapa02` foi criada a partir do histórico original (base `09e27b6`), com pelo menos cinco commits reais incrementais e publicação no mesmo `origin`. Não houve reescrita do histórico nem substituição do projeto por um repositório novo. A evolução foi integrada em main com autorização explícita do autor. O Pages já entrega esta versão; o navegador público carregou os dados do Supabase e a classificação real de 2025.
 
 O ZIP final inclui o código e `F1-Pulse.bundle`, que transporta o histórico Git completo. Para recuperar um clone a partir do pacote:
 
@@ -147,7 +149,7 @@ git switch etapa02
 git remote set-url origin https://github.com/davidmarinho14/F1-Pulse.git
 ```
 
-Para publicar no Pages, finalize configuração e testes reais, integre a branch `etapa02` em `main`, confira a origem configurada em Settings → Pages e aguarde a implantação. Depois valide os fluxos do banco no endereço público. Não declare a Etapa 02 online antes dessa confirmação.
+A Etapa 02 já foi publicada no Pages. Em futuras atualizações, integre as mudanças em main e aguarde a implantação antes de validar o endereço público. A publicação Docker Hub continua independente e pendente.
 
 ## Links da entrega
 
