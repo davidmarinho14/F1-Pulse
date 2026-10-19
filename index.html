@@ -20,6 +20,7 @@
             <a href="#dashboard">Dashboard</a>
             <a href="#pilotos">Pilotos</a>
             <a href="#corridas">Corridas</a>
+            <a href="#favoritos">Favoritos</a>
         </nav>
 
         <div class="season-selector">
@@ -98,7 +99,7 @@
                 <div class="search-box">
                     <input
                         type="text"
-                        id="driver-search"
+                        id="driver-search" aria-label="Nome do piloto" maxlength="100"
                         placeholder="Search driver..."
                     >
 
@@ -109,7 +110,7 @@
             </div>
 
 
-            <div id="driver-result" class="driver-result"></div>
+            <div id="driver-result" class="driver-result" aria-live="polite"></div>
 
 
             <div id="drivers-list" class="drivers-list">
@@ -122,6 +123,19 @@
 
         </section>
 
+
+        <section id="favoritos" class="content-section">
+            <div class="section-heading"><h2>Pilotos favoritos</h2><button id="refresh-saved">Atualizar dados salvos</button></div>
+            <p>Coleção pública compartilhada entre visitantes. Cada piloto pode ser salvo uma vez por temporada.</p>
+            <p id="db-message" role="status" aria-live="polite"></p>
+            <div id="favorites-list"></div>
+            <button id="more-favorites" hidden>Carregar mais favoritos</button>
+            <h3>Estatísticas dos favoritos</h3>
+            <dl id="saved-stats" class="saved-stats"><dt>Banco não conectado</dt><dd>—</dd></dl>
+            <h3>Últimas 5 buscas</h3>
+            <p id="history-message" role="status"></p>
+            <div id="search-history"></div>
+        </section>
 
         <!-- CONSTRUCTORS -->
         <section class="content-section">
@@ -199,7 +213,10 @@
     </footer>
 
 
+    <script src="config.js"></script>
+    <script src="db.js"></script>
     <script src="script.js"></script>
+    <script src="persistence.js"></script>
 
 </body>
 </html>

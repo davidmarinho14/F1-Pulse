@@ -19,6 +19,10 @@ const searchDriverButton = document.getElementById("search-driver");
 const driverResult = document.getElementById("driver-result");
 
 let currentDrivers = [];
+let loadedSeason = null;
+let seasonRequest = 0;
+let searchRequest = 0;
+const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[c]));
 
 
 /* =========================
@@ -26,7 +30,7 @@ let currentDrivers = [];
 ========================= */
 
 async function fetchAPI(endpoint) {
-    const response = await fetch(`${API_BASE}/${endpoint}`);
+    const response = await fetch(`${API_BASE}/${endpoint}`, { signal: AbortSignal.timeout(15000) });
 
     if (!response.ok) {
         throw new Error("Erro ao consultar a API.");
@@ -42,7 +46,13 @@ async function fetchAPI(endpoint) {
 
 async function loadSeason() {
     const season = seasonSelect.value;
-
+    const request = ++seasonRequest;
+    ++searchRequest;
+    loadedSeason = null;
+    currentDrivers = [];
+    driverResult.innerHTML = "";
+    driverCount.textContent = "--";
+    currentRound.textContent = "--";
     hideError();
 
     currentSeason.textContent = season;
@@ -58,25 +68,27 @@ async function loadSeason() {
             fetchAPI(`${season}/races/`)
         ]);
 
+        if (request !== seasonRequest) return;
         const driversStandings =
             driversData.MRData.StandingsTable.StandingsLists[0];
 
         const drivers =
-            driversStandings.DriverStandings || [];
+            driversStandings?.DriverStandings || [];
 
         const constructorsStandings =
             constructorsData.MRData.StandingsTable.StandingsLists[0];
 
         const constructors =
-            constructorsStandings.ConstructorStandings || [];
+            constructorsStandings?.ConstructorStandings || [];
 
         const races =
             racesData.MRData.RaceTable.Races || [];
 
         currentDrivers = drivers;
+        loadedSeason = season;
 
         currentRound.textContent =
-            driversStandings.round || "--";
+            driversStandings?.round || "--";
 
         driverCount.textContent =
             drivers.length;
@@ -86,8 +98,8 @@ async function loadSeason() {
         renderRaces(races);
 
     } catch (error) {
+        if (request !== seasonRequest) return;
         console.error(error);
-
         showError();
 
         driversList.innerHTML = "";
@@ -126,21 +138,22 @@ function renderDrivers(drivers) {
 
                 <div>
                     <div class="driver-name">
-                        ${name}
+                        ${escapeHTML(name)}
                     </div>
 
                     <div class="driver-team">
-                        ${team}
+                        ${escapeHTML(team)}
                     </div>
                 </div>
 
                 <div class="driver-team">
-                    ${driver.Driver.nationality}
+                    ${escapeHTML(driver.Driver.nationality)}
                 </div>
 
                 <div class="driver-points">
-                    ${driver.points} PTS
+                    ${escapeHTML(driver.points)} PTS
                 </div>
+                <button class="favorite-button" data-save="${escapeHTML(driver.Driver.driverId)}">Salvar favorito</button>
 
             </div>
         `;
@@ -167,11 +180,11 @@ function renderConstructors(constructors) {
 
                 <div>
                     <div class="constructor-name">
-                        ${team.position}. ${team.Constructor.name}
+                        ${team.position}. ${escapeHTML(team.Constructor.name)}
                     </div>
 
                     <div class="driver-team">
-                        ${team.Constructor.nationality}
+                        ${escapeHTML(team.Constructor.nationality)}
                     </div>
                 </div>
 
@@ -199,7 +212,7 @@ function renderRaces(races) {
 
     racesList.innerHTML = races.map(race => {
 
-        const date = new Date(race.date);
+        const date = new Date(race.date + "T12:00:00");
 
         const formattedDate =
             date.toLocaleDateString("pt-BR", {
@@ -216,7 +229,7 @@ function renderRaces(races) {
                 </div>
 
                 <div class="race-name">
-                    ${race.raceName}
+                    ${escapeHTML(race.raceName)}
                 </div>
 
                 <div class="race-date">
@@ -235,13 +248,21 @@ function renderRaces(races) {
 
 async function searchDriver() {
 
-    const search = driverSearch.value.trim().toLowerCase();
+    const search = driverSearch.value.trim().toLowerCase().slice(0, 100);
+    const request = ++searchRequest;
+    const season = seasonSelect.value;
+    let found = false;
 
     if (!search) {
         driverResult.innerHTML = "";
         return;
     }
 
+    if (loadedSeason !== season) {
+        driverResult.textContent = "Carregue a temporada antes de buscar.";
+        void recordSearch(search, season, false);
+        return;
+    }
     const driver = currentDrivers.find(driver => {
 
         const fullName =
@@ -252,6 +273,7 @@ async function searchDriver() {
     });
 
     if (!driver) {
+        void recordSearch(search, season, false);
         driverResult.innerHTML = `
             <div class="search-result-card">
                 <h3>Driver not found</h3>
@@ -266,19 +288,22 @@ async function searchDriver() {
 
     try {
 
-        const season = seasonSelect.value;
+        driverResult.textContent = "Buscando piloto...";
         const driverId = driver.Driver.driverId;
 
         const data = await fetchAPI(
             `${season}/drivers/${driverId}/driverstandings/`
         );
 
+        if (request !== searchRequest) return;
         const standings =
             data.MRData.StandingsTable.StandingsLists[0];
 
         const result =
-            standings.DriverStandings[0];
+            standings?.DriverStandings?.[0];
 
+        if (!result) throw new Error("Piloto sem classificação");
+        found = true;
         const name =
             `${result.Driver.givenName} ${result.Driver.familyName}`;
 
@@ -288,14 +313,14 @@ async function searchDriver() {
         driverResult.innerHTML = `
             <div class="search-result-card">
 
-                <h3>${name}</h3>
+                <h3>${escapeHTML(name)}</h3>
 
                 <p>
-                    Team: ${team}
+                    Team: ${escapeHTML(team)}
                 </p>
 
                 <p>
-                    Nationality: ${result.Driver.nationality}
+                    Nationality: ${escapeHTML(result.Driver.nationality)}
                 </p>
 
                 <p>
@@ -310,14 +335,15 @@ async function searchDriver() {
 
                 <p>
                     Wins:
-                    ${result.wins}
+                    ${escapeHTML(result.wins)}
                 </p>
+                <button class="favorite-button" data-save="${escapeHTML(result.Driver.driverId)}">Salvar favorito</button>
 
             </div>
         `;
 
     } catch (error) {
-
+        if (request !== searchRequest) return;
         console.error(error);
 
         driverResult.innerHTML = `
@@ -328,6 +354,8 @@ async function searchDriver() {
                 </p>
             </div>
         `;
+    } finally {
+        void recordSearch(search, season, found);
     }
 }
 
