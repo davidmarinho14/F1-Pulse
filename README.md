@@ -1,6 +1,6 @@
 # F1 Pulse — Formula 1 Season Dashboard · Etapa 02
 
-> **Estado desta entrega:** Supabase configurado e validado no banco real: criar, consultar, remover, duplicados, estatísticas e restrições de acesso. A interface também passou no fluxo real de salvar/recarregar/remover e gravar histórico. A publicação Docker ainda depende do segredo DOCKERHUB_TOKEN no GitHub. O código é a evolução do mesmo repositório, com histórico preservado.
+> **Estado desta entrega:** Supabase configurado e validado no banco real: criar, consultar, remover, duplicados, estatísticas e restrições de acesso. A interface também passou no fluxo real de salvar/recarregar/remover e gravar histórico. A publicação Docker ainda depende do segredo DOCKERHUB_TOKEN no GitHub. O código é a evolução do mesmo repositório, com histórico preservado. A branch etapa02 está atualizada; main e o Pages continuam na versão anterior, aguardando autorização para atualização.
 
 ## Evolução da Etapa 02
 
